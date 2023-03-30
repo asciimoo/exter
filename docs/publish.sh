@@ -8,7 +8,7 @@ if [ -d "$TMP_DIR" ]; then
     rm -r "$TMP_DIR"
 fi
 
-./build.sh
+./build.sh --pathprefix=/exter/
 cp -r dist "$TMP_DIR"
 cd ../
 git checkout gh-pages

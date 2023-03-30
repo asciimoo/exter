@@ -8,25 +8,25 @@ title: Exter documentation
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="/static/css/pico.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ "/static/css/pico.min.css" | url }}">
+    <link rel="stylesheet" href="{{ "/static/css/style.css" | url }}">
   </head>
   <body>
     <main class="container">
-      <h1><a href="/" aria-label="menu">Exter documentation</a></h1>
+      <h1><a href="{{ "/" | url }}" aria-label="menu">Exter documentation</a></h1>
       <div class="grid">
         <aside>
           <details{% if category == "start" %} open="true"{% endif %}>
             <summary>Getting started</summary>
             <ul>
-              <li><a href="/" id="start-link" class="secondary">About</a></li>
+              <li><a href="{{ "/" | url }}" id="start-link" class="secondary">About</a></li>
               <li><a href="#" id="start-link" class="secondary">Usage</a></li>
             </ul>
           </details>
           <details{% if category == "addon" %} open="true"{% endif %}>
             <summary>Addons</summary>
             <ul>
-              <li><a href="/addon_API/" id="start-link" class="secondary">API</a></li>
+              <li><a href="{{ "/addon_API/" | url }}" id="start-link" class="secondary">API</a></li>
             </ul>
           </details>
         </aside>

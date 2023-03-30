@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Exter</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+  </body>
+</html>
+<script>
+  let indexHTML = `
+    <section>
+      <h1><span class="logo"></span>Exter</h1>
+      <form action="/open/" method="GET">
+        <input type="url" name="url" placeholder="https://example.com/" autofocus required />
+      </form>
+    </section>
+    <footer>
+      <a href="/addons" onclick="return renderAddons();">Addons</a>
+    </footer>`;
+  let addonHTML = `
+    <section>
+      <h1>Addons</h1>
+      <ul id="addons"></ul>
+    </section>
+    <footer>
+      <a href="/addons" onclick="return renderIndex();">Exter</a>
+    </footer>`;
+  function renderIndex() {
+      document.body.innerHTML = indexHTML;
+      return false;
+  }
+  function renderAddons() {
+      fetch('/addons')
+          .then((response) => response.json())
+          .then((data) => {
+              document.body.innerHTML = addonHTML;
+              const c = document.getElementById("addons");
+              for(let addonName in data.addonsAvailable) {
+                  const addon = data.addonsAvailable[addonName];
+                  const a = document.createElement("li");
+                  const enabled = addon.enabled;
+                  a.innerHTML = `
+<button onclick="toggleAddon(this, '${addon.manifest.name}');" class="${enabled ? "enabled" : "disabled"}">${enabled ? "enabled" : "disabled"}</button>
+<h2><img src="/static/addons/${addon.manifest.name}/${addon.manifest.icon}" class="icon"/>${addonName}</h2>
+<p>${addon.manifest.description}</p>
+`;
+                  c.append(a);
+              }
+          });
+      return false;
+  }
+  function toggleAddon(el, addonName) {
+      var isEnabled = el.className == "enabled";
+      fetch("/addons", {
+          method: "post",
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              addon: addonName,
+              enable: !isEnabled,
+          })
+      }).then((response) => {
+          el.className = isEnabled ? "disabled" : "enabled";
+          el.innerText = el.className;
+      });
+      // TODO error handling
+  }
+  renderIndex();
+</script>

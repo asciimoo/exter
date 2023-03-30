@@ -1,0 +1,11 @@
+{
+    "manifest_version": 1,
+    "version": "0.1.0",
+    "name": "example",
+    "description": "this is an example addon",
+    "scripts": {
+        "browser": "browser.js",
+        "server": "server.js"
+    },
+    "icon": "logo.png"
+}

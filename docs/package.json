@@ -1,0 +1,18 @@
+{
+  "name": "docs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx @11ty/eleventy --serve",
+    "build": "./build.sh",
+    "publish": "./publish.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPLv3+",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}

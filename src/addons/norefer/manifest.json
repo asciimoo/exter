@@ -1,0 +1,10 @@
+{
+    "manifest_version": 1,
+    "version": "0.1.0",
+    "name": "norefer",
+    "description": "Removes referrer HTTP header",
+    "scripts": {
+        "server": "server.js"
+    },
+    "icon": "logo.png"
+}

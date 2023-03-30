@@ -1,0 +1,66 @@
+* {
+    font-family: sans-serif;
+    font-weight: 200;
+    color: #333;
+}
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+}
+section, footer {
+    max-width: 80em;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+input[type="url"] {
+    width: 100%;
+    font-size: 2em;
+    padding: 0.5em;
+}
+h1 {
+    font-size: 4em;
+}
+.logo {
+    background-image: url("/static/logo.png");
+    background-size: cover;
+    display: inline-block;
+    width: 0.7em;
+    height: 0.7em;
+    margin-right: 0.1em;
+}
+footer {
+    margin-top: auto;
+    min-height: 5em;
+}
+
+#addons {
+    text-align: left;
+}
+#addons li {
+    list-style: none;
+    border-bottom: 1px solid #333;
+}
+#addons button {
+    float: right;
+    height: 3em;
+    font-size: 1.5em;
+    text-align: center;
+    cursor: pointer;
+    color: #FFF;
+}
+#addons button.enabled {
+    background-color: #1abc9c;
+    border: 4px solid #16a085;
+}
+#addons button.disabled {
+    background-color: #e74c3c;
+    border: 4px solid #c0392b;
+}
+.icon {
+    width: 1em;
+    margin-right: 1em;
+}

@@ -6,7 +6,7 @@ Instead of trusting the browsers' plugin ecosystem, let's modify the websites be
 The goal of this project is to provide a stable and free website-extension-platform to allow future proof and flexible plugin development for a free internet.
 
 
-## [Documentation](https://asciimoo.github.com/exter/)
+## [Documentation](https://asciimoo.github.io/exter/)
 
 
 ## Warning
@@ -47,7 +47,7 @@ Both the backend and the injected client scripts define multiple events like HTT
 
 ## License
 
-Project is licensed under [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html) *except the addons*. Addons are not part of the core application, independent licensing required in every individual addon. Addons are located in the `src/addons/` folder and loaded by `src/backend/addonstore.js`.
+Project is licensed under [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html) **except the addons**. Addons are not part of the core application, independent licensing required in every individual addon. Addons are located in the [addons](https://github.com/asciimoo/exter/tree/master/src/addons) folder and loaded by [addonstore.js](https://github.com/asciimoo/exter/blob/master/src/backend/addonstore.js).
 
 ## TODO
 

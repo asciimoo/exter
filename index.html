@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exter documentation</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+  <body>
+    <main class="container">
+      <h1><a href="/" aria-label="menu">Exter documentation</a></h1>
+      <div class="grid">
+        <aside>
+          <details open="true">
+            <summary>Getting started</summary>
+            <ul>
+              <li><a href="/" id="start-link" class="secondary">About</a></li>
+              <li><a href="#" id="start-link" class="secondary">Usage</a></li>
+            </ul>
+          </details>
+          <details>
+            <summary>Addons</summary>
+            <ul>
+              <li><a href="/addon_API/" id="start-link" class="secondary">API</a></li>
+            </ul>
+          </details>
+        </aside>
+        <div class="content">
+            <p>Exter is a web based plugin platform which allows addons to alter websites behavior/style/functionality.
+Instead of trusting the browsers' plugin ecosystem, let's modify the websites before browsers receive them!</p>
+<p>The goal of this project is to provide a stable and free website-extension-platform to allow future proof and flexible plugin development for a free internet.</p>
+<h2>Why?</h2>
+<p>We have well establised browser extension ecosystem for the exact same purpose, why do we need a similar service?</p>
+<p>Well, while chromium based browsers dominating the browser market, the decision about the future of the web extension api is pretty much in one companies hands.
+Introducing more and more restrictions to the web extension api and setting up barriers to publish browser addons can harm the freedom of browser plugins and plugin development - especially of the privacy/security related plugins.</p>
+<h2>How?</h2>
+<p>Exter is a web application which opens URLs, rewrites the static content and injects client scripts to wrap default javascript functions, applies addons, then sends the sanitized/modified website to the browser.
+This way we have the ability to intercept/modify not only HTTP requests, but even client side functionalities, like sanitizing 3rd party content or appending new DOM elements to the website or altering cookie handling from javascript, etc...</p>
+<p>Both the backend and the injected client scripts define multiple events like HTTP request/response, DOM modification, etc.. Addons can subscribe to any subset of these events allowing the addon to alter or cancel the events.</p>
+
+        </div>
+      </div>
+    </main>
+    <footer class="container footer">
+        <p>
+          <strong><a href="https://github.com/asciimoo/exter">Exter</a></strong><br />
+           License: <a href="https://www.gnu.org/licenses/agpl-3.0.html">AGPLv3</a>
+        </p>
+    </footer>
+  </body>
+</html>

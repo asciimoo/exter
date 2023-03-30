@@ -1,0 +1,43 @@
+details {
+    margin-bottom: 4px;
+    border: 0;
+    padding: 0;
+
+}
+
+details[open] {
+    margin-bottom: 0;
+}
+
+details>summary, details[open]>summary {
+    margin: 4px 0;
+    color: inherit !important;
+}
+
+summary::after {
+    float: left !important;
+}
+
+summary:focus {
+    color: inherit !important;
+}
+
+details>ul>li {
+    padding: 2px 1em;
+}
+
+details>ul>li>a {
+    text-decoration: none;
+    color: var(--primary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 12em 1fr;
+}
+.content {
+    text-align: justify;
+}
+.footer {
+    text-align: center;
+}

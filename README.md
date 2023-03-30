@@ -6,6 +6,17 @@ Instead of trusting the browsers' plugin ecosystem, let's modify the websites be
 The goal of this project is to provide a stable and free website-extension-platform to allow future proof and flexible plugin development for a free internet.
 
 
+## [Documentation](https://asciimoo.github.com/exter/)
+
+
+## Warning
+
+This project is in a very early stage, the functionality is far from complete and the API is subject of radical changes.
+Also I'm not a JS coder, the code probably contains tons of suboptimal and nonidiomatic solutions.
+
+#### Suggestions and contributions are greatly appreciated!
+
+
 ## Why?
 
 We have well establised browser extension ecosystem for the exact same purpose, why do we need a similar service?
@@ -20,22 +31,6 @@ Exter is a web application which opens URLs, rewrites the static content and inj
 This way we have the ability to intercept/modify not only HTTP requests, but even client side functionalities, like sanitizing 3rd party content or appending new DOM elements to the website or altering cookie handling from javascript, etc...
 
 Both the backend and the injected client scripts define multiple events like HTTP request/response, DOM modification, etc.. Addons can subscribe to any subset of these events allowing the addon to alter or cancel the events.
-
-
-## Setup
-
-Clone the repo, run `npm i` from the project root to install dependencies, then `npm run dev` to start the webserver and visit http://127.0.0.1:3000/ from your browser.
-
-
-## [Documentation](https://asciimoo.github.com/exter/)
-
-
-## Warning
-
-This project is in a very early stage, the functionality is far from complete and the API is subject of radical changes.
-Also (by peeking at the code, you can tell, that) I'm not a JS coder, the code probably contains tons of suboptimal and nonidiomatic solutions.
-
-#### Suggestions and PRs are greatly appreciated!
 
 ### Pros & cons
 

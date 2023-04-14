@@ -85,7 +85,7 @@ async function downloadEndpoint(req, exterResponse, next) {
         'headers': getDefaultRequestHeaders()
     }
     params.headers['Referer'] = extractOriginalURL(req.get('Referer'));
-    if(req.method == 'POST') {
+    if(req.method == 'POST' || req.method == 'PATCH') {
         doRequest = got.post;
         params.options.body = req.body;
         params.headers['content-type'] = req.headers['content-type'];
@@ -103,7 +103,7 @@ async function downloadEndpoint(req, exterResponse, next) {
         if(response.redirectUrls.length) {
             params.url = response.redirectUrls.slice(-1)[0].href;
         }
-        console.log("Fetching ", response.statusCode, req.method, params.url);
+        console.log("Fetching ", response.statusCode, req.method, params.url, response.headers['content-type']);
         const ctype = (response.headers['content-type'] || '').split(';')[0].toLowerCase();
         await addRequest(params.url, response.statusCode, ctype);
         const responseHandler = responseTypeHandlers[ctype];

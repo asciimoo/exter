@@ -17,6 +17,10 @@ mainRouter.route('/open/*').get(downloadEndpoint);
 mainRouter.route('/ajax/*').get(downloadEndpoint);
 mainRouter.route('/open/*').post(downloadEndpoint);
 mainRouter.route('/ajax/*').post(downloadEndpoint);
+mainRouter.route('/open/*').patch(downloadEndpoint);
+mainRouter.route('/ajax/*').patch(downloadEndpoint);
+mainRouter.route('/open/*').head(downloadEndpoint);
+mainRouter.route('/ajax/*').head(downloadEndpoint);
 
 mainRouter.route('/addons').get(addonEndpoint);
 mainRouter.route('/addons').post(addonPostEndpoint);

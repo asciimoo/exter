@@ -59,11 +59,7 @@ function wrapFn(name, origFn, newFn) {
     o[name] = origFn;
     return function() {
         // TODO call original function in this namespace
-        if(this.ownCode == vars['namespace']) {
-            return origFn.call(this, ...arguments);
-        } else {
-            return newFn.call(this, ...arguments);
-        }
+        return newFn.call(this, ...arguments);
     };
 }
 
@@ -71,6 +67,10 @@ function wrapFn(name, origFn, newFn) {
 function wrapGS(name, origGS, newGS) {
     o[name] = Object.getOwnPropertyDescriptor(origGS, name);
     Object.defineProperty(origGS, name, newGS);
+}
+function wrapGSWithCustomName(name, property, origGS, newGS) {
+    o[name] = Object.getOwnPropertyDescriptor(origGS, property);
+    Object.defineProperty(origGS, property, newGS);
 }
 
 console.log = wrapFn(
@@ -158,20 +158,39 @@ wrapGS(
     }
 );
 
-wrapGS(
-    'attributes', HTMLElement.prototype.__proto__,
+//wrapGS(
+//    'attributes', HTMLElement.prototype.__proto__,
+//    {
+//        get() {
+//            let ret = o['attributes'].get.call(this);
+//            for(let v of ret) {
+//                if(v.name == 'href' || v.name == 'src' || v.name == 'action') {
+//                    v.value = unwrapUrl(v.value);
+//                }
+//            }
+//            return ret;
+//        },
+//        set() {
+//            return o['attributes'].set.call(this, ...arguments);
+//        }
+//    }
+//);
+
+wrapGSWithCustomName(
+    'attrValue', 'value', Attr.prototype,
     {
         get() {
-            let ret = o['attributes'].get.call(this);
-            for(let v of ret) {
-                if(v.name == 'href' || v.name == 'src' || v.name == 'action') {
-                    v.value = unwrapUrl(v.value);
-                }
+            let ret = o['attrValue'].get.call(this);
+            if(this.name == 'href' || this.name == 'src' || this.name == 'action') {
+                ret = unwrapUrl(ret);
             }
             return ret;
         },
-        set() {
-            return o['attributes'].set.call(this, ...arguments);
+        set(newValue) {
+            if(this.name == 'href' || this.name == 'src' || this.name == 'action') {
+                newValue = wrapUrl(newValue, vars['url'], '/open/');
+            }
+            return o['attrValue'].set.call(this, newValue);
         }
     }
 );
@@ -196,7 +215,7 @@ history.pushState = wrapFn(
     'pushState', window.history.pushState,
     function() {
         arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
-        return o['pushState'](...arguments);
+        return o['pushState'].call(this, ...arguments);
     }
 );
 
@@ -204,7 +223,7 @@ history.replaceState = wrapFn(
     'replaceState', window.history.replaceState,
     function() {
         arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
-        return o['replaceState'](...arguments);
+        return o['replaceState'].call(this, ...arguments);
     }
 );
 
@@ -230,13 +249,12 @@ XMLHttpRequest.prototype.open = wrapFn(
 
 // TODO XMLHttpRequest.prototype.onreadystatechange
 
-fetch = wrapFn(
-    'fetch', fetch,
-    async function fetch() {
-        arguments[0] = wrapUrl(arguments[0], vars['url'], '/ajax/');
-        return o['fetch'](...arguments);
-    }
-);
+o['fetch'] = window.fetch.bind(window);
+fetch = async function() {
+    debug("FETCH", arguments);
+    arguments[0] = wrapUrl(arguments[0], vars['url'], '/ajax/');
+    return o['fetch'].call(this, ...arguments);
+};
 
 function debug() {
     if(!vars.debug) return;

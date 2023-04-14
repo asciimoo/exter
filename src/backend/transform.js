@@ -51,10 +51,13 @@ const attributeHandlers = {
     'a': handleHref,
     'form': handleAction,
     'img': handleSrc,
-    'link': handleHref,
     'meta': handleMetaAttrs,
     'script': handleSrc,
     'source': handleSrc,
+}
+
+const elementHandlers = {
+    link: handleLinkElement
 }
 
 const elementTextHandlers = {
@@ -81,8 +84,12 @@ const selfClosingTags = {
 function transformHtml(response, exterResponse, url) {
     let tagname = '';
     const parser = new htmlparser2.Parser({
-        onopentag(name, attributes) {
-            tagname = name;
+        onopentag(tagname, attributes) {
+            if(elementHandlers[tagname]) {
+                let ret = elementHandlers[tagname](tagname, attributes, url);
+                tagname = ret[0];
+                attributes = ret[1];
+            }
             const handler = attributeHandlers[tagname];
             if(handler) {
                 handler(attributes, url);
@@ -170,6 +177,19 @@ function handleMetaAttrs(attributes, url) {
     if(attributes['itemprop'] == 'image') {
         attributes.content = wrapUrl(attributes.content, url);
     }
+}
+
+function handleLinkElement(name, attributes, url) {
+    if(attributes.rel == 'preload') {
+        if(attributes.as == 'script') {
+            name = 'script';
+            attributes = {src: url};
+        }
+    }
+    if(attributes.href) {
+        attributes.href = wrapUrl(attributes.href, url);
+    }
+    return [name, attributes];
 }
 
 export {

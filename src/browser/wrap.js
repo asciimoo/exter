@@ -47,6 +47,8 @@ let domEditFunctions = [
     'prepend',
     'replaceWith',
     'replaceChild',
+    'insertBefore',
+    'insertAdjacentElement'
 ];
 
 //TODO
@@ -82,7 +84,6 @@ for(const f of domEditFunctions) {
     HTMLElement.prototype[f] = wrapFn(
         f, HTMLElement.prototype[f],
         function() {
-            debug(f, this, ...arguments);
             fixDOM(arguments[0]);
             let params = {
                 'args': arguments,
@@ -102,7 +103,6 @@ for(const f of domEditFunctions) {
 HTMLElement.prototype.setAttribute = wrapFn(
     'setAttribute', HTMLElement.prototype.setAttribute,
     function() {
-        debug("setAttribute", arguments[0], "=", arguments[1]);
         let params = {
             'args': arguments,
             'element': this,
@@ -122,7 +122,6 @@ HTMLElement.prototype.setAttribute = wrapFn(
 HTMLElement.prototype.getAttribute = wrapFn(
     'getAttribute', HTMLElement.prototype.getAttribute,
     function() {
-        debug("getAttribute", this, arguments[0]);
         let attr = o['getAttribute'].call(this, ...arguments);
         if(arguments[0] == 'href' || arguments[0] == 'src' || arguments[0] == 'action') {
             attr = unwrapUrl(attr);
@@ -131,34 +130,13 @@ HTMLElement.prototype.getAttribute = wrapFn(
     }
 );
 
-XMLHttpRequest.prototype.send = wrapFn(
-    'XMLHttpRequest_send', XMLHttpRequest.prototype.send,
-    function() {
-        debug("XMLHttpRequest.send", );
-        o['XMLHttpRequest_send'].call(this, ...arguments);
-    }
-);
-
-XMLHttpRequest.prototype.open = wrapFn(
-    'XMLHttpRequest_open', XMLHttpRequest.prototype.open,
-    function(method, url) {
-        debug("XMLHttpRequest.open", url);
-        url = wrapUrl(url, vars['url'], '/ajax/');
-        o['XMLHttpRequest_open'].call(this, ...arguments);
-    }
-);
-
-// TODO XMLHttpRequest.prototype.onreadystatechange
-
 wrapGS(
     'innerText', HTMLElement.prototype,
     {
         get() {
-            debug('Getting innerText');
             return o['innerText'].get.call(this);
         },
         set(value) {
-            debug('innerText =', value);
             return o['innerText'].set.call(this, value);
         }
     }
@@ -168,7 +146,6 @@ wrapGS(
     'innerHTML', HTMLElement.prototype.__proto__,
     {
         get() {
-            debug('Getting innerHTML');
             return o['innerHTML'].get.call(this);
         },
         set(value) {
@@ -176,8 +153,25 @@ wrapGS(
             o['innerHTML'].set.call(div, value);
             fixDOM(div);
             value = o['innerHTML'].get.call(div);
-            debug('innerHTML =', value);
             return o['innerHTML'].set.call(this, value);
+        }
+    }
+);
+
+wrapGS(
+    'attributes', HTMLElement.prototype.__proto__,
+    {
+        get() {
+            let ret = o['attributes'].get.call(this);
+            for(let v of ret) {
+                if(v.name == 'href' || v.name == 'src' || v.name == 'action') {
+                    v.value = unwrapUrl(v.value);
+                }
+            }
+            return ret;
+        },
+        set() {
+            return o['attributes'].set.call(this, ...arguments);
         }
     }
 );
@@ -186,16 +180,61 @@ wrapGS(
     'cookie', document.__proto__.__proto__,
     {
         get() {
-            debug('Get cookie', this, ...arguments);
-            return o['cookie'].get.call(this);
+            return o['cookie'].get.call(this, ...arguments);
         },
         set(value) {
-            debug('Setting cookie=', value);
+            // TODO handle domain
             let cookie = encodeURIComponent(value);
             let url = encodeURIComponent(vars['url']);
-            fetch(`/set_cookie?cookie=${cookie}&url=${url}`);
+            o['fetch'](`/set_cookie?cookie=${cookie}&url=${url}`);
             return o['cookie'].set.call(this, ...arguments);
         }
+    }
+);
+
+history.pushState = wrapFn(
+    'pushState', window.history.pushState,
+    function() {
+        arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
+        return o['pushState'](...arguments);
+    }
+);
+
+history.replaceState = wrapFn(
+    'replaceState', window.history.replaceState,
+    function() {
+        arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
+        return o['replaceState'](...arguments);
+    }
+);
+
+// TODO
+// history.state , PopStateEvent
+
+XMLHttpRequest.prototype.send = wrapFn(
+    'XMLHttpRequest_send', XMLHttpRequest.prototype.send,
+    function() {
+        debug("XMLHttpRequest.send");
+        return o['XMLHttpRequest_send'].call(this, ...arguments);
+    }
+);
+
+XMLHttpRequest.prototype.open = wrapFn(
+    'XMLHttpRequest_open', XMLHttpRequest.prototype.open,
+    function(method, url) {
+        url = wrapUrl(url, vars['url'], '/ajax/');
+        debug("XMLHttpRequest.open", url);
+        return o['XMLHttpRequest_open'].call(this, ...arguments);
+    }
+);
+
+// TODO XMLHttpRequest.prototype.onreadystatechange
+
+fetch = wrapFn(
+    'fetch', fetch,
+    async function fetch() {
+        arguments[0] = wrapUrl(arguments[0], vars['url'], '/ajax/');
+        return o['fetch'](...arguments);
     }
 );
 

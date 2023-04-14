@@ -6,7 +6,7 @@ import * as csstree from 'css-tree';
 import { addons } from './addonstore.js';
 import { config } from './config.js';
 import { wrapUrl } from './utils.js';
-import { registerEventHandler, createEvents } from '../shared/events.js';
+import { registerEventHandler } from '../shared/events.js';
 
 let browserScripts = [];
 for(const f of config.browserFiles) {

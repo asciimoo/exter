@@ -71,7 +71,7 @@ async function downloadEndpoint(req, exterResponse, next) {
         }
     }
     if(req.query) {
-        const qs = serializeQuery(req.query);
+        const qs = serializeQuery(req.query)
         if(qs) {
             url = `${url}?${qs}`;
         }
@@ -83,7 +83,7 @@ async function downloadEndpoint(req, exterResponse, next) {
         'url': url,
         'options': getDefaultRequestOptions(),
         'headers': getDefaultRequestHeaders()
-    };
+    }
     params.headers['Referer'] = extractOriginalURL(req.get('Referer'));
     if(req.method == 'POST') {
         doRequest = got.post;

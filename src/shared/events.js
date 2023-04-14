@@ -29,7 +29,7 @@ function createEvents(names, args) {
             continue;
         }
         for(const handler of events[name]) {
-            handlers.add(handler)
+            handlers.add(handler);
         }
     }
     for(const handler of handlers) {

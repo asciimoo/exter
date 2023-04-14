@@ -108,7 +108,7 @@ HTMLElement.prototype.setAttribute = wrapFn(
             'element': this,
             'abort': false,
         };
-        params = createEvents(['setAttribute'], params);
+        params = createEvents(['setAttribute', 'domEdit'], params);
         if(params.abort) {
             return;
         }
@@ -124,7 +124,7 @@ HTMLElement.prototype.getAttribute = wrapFn(
     function() {
         debug("getAttribute", this, arguments[0]);
         let attr = o['getAttribute'].call(this, ...arguments);
-        if(arguments[0] == 'href' || arguments[0] == 'src') {
+        if(arguments[0] == 'href' || arguments[0] == 'src' || arguments[0] == 'action') {
             attr = unwrapUrl(attr);
         }
         return attr;

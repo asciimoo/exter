@@ -6,7 +6,8 @@
 let o = {};
 
 function wrapUrl(url, base, prefix) {
-    if(url && (url.startsWith('data:') || url.startsWith('mailto:') || url.startsWith('javascript:')
+    if(typeof url != "string" || (url.startsWith('data:')
+               || url.startsWith('mailto:') || url.startsWith('javascript:')
                || url.startsWith('/open/http://') ||  url.startsWith('/open/https://') || url.startsWith('/ajax/http://') || url.startsWith('/ajax/https://'))) {
         return url;
     }
@@ -195,6 +196,7 @@ wrapGSWithCustomName(
     }
 );
 
+
 wrapGS(
     'cookie', document.__proto__.__proto__,
     {
@@ -211,16 +213,16 @@ wrapGS(
     }
 );
 
-history.pushState = wrapFn(
-    'pushState', window.history.pushState,
+history.__proto__.pushState = wrapFn(
+    'pushState', window.history.__proto__.pushState,
     function() {
         arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
         return o['pushState'].call(this, ...arguments);
     }
 );
 
-history.replaceState = wrapFn(
-    'replaceState', window.history.replaceState,
+history.__proto__.replaceState = wrapFn(
+    'replaceState', window.history.__proto__.replaceState,
     function() {
         arguments[2] = wrapUrl(arguments[2], vars['url'], '/open/');
         return o['replaceState'].call(this, ...arguments);
@@ -233,7 +235,7 @@ history.replaceState = wrapFn(
 XMLHttpRequest.prototype.send = wrapFn(
     'XMLHttpRequest_send', XMLHttpRequest.prototype.send,
     function() {
-        debug("XMLHttpRequest.send");
+        debuglog("XMLHttpRequest.send");
         return o['XMLHttpRequest_send'].call(this, ...arguments);
     }
 );
@@ -242,7 +244,7 @@ XMLHttpRequest.prototype.open = wrapFn(
     'XMLHttpRequest_open', XMLHttpRequest.prototype.open,
     function(method, url) {
         url = wrapUrl(url, vars['url'], '/ajax/');
-        debug("XMLHttpRequest.open", url);
+        debuglog("XMLHttpRequest.open", url);
         return o['XMLHttpRequest_open'].call(this, ...arguments);
     }
 );
@@ -251,12 +253,31 @@ XMLHttpRequest.prototype.open = wrapFn(
 
 o['fetch'] = window.fetch.bind(window);
 fetch = async function() {
-    debug("FETCH", arguments);
+    debuglog("FETCH", arguments);
     arguments[0] = wrapUrl(arguments[0], vars['url'], '/ajax/');
     return o['fetch'].call(this, ...arguments);
 };
 
-function debug() {
+iframeContentWindows = {};
+
+wrapGSWithCustomName(
+    'iframeContentWindow', 'contentWindow', HTMLIFrameElement.prototype,
+    {
+        get() {
+            if(!iframeContentWindows[this]) {
+                // TODO rewrite all iframe contentWindow functions
+                let cw = o['iframeContentWindow'].get.call(this);
+                cw.history.__proto__ = history.__proto__;
+                iframeContentWindows[this] = cw;
+            }
+            return iframeContentWindows[this];
+        },
+        set(value) {
+        }
+    }
+);
+
+function debuglog() {
     if(!vars.debug) return;
     o['console_log']("[EXTER_LOG]", ...arguments);
 }

@@ -268,6 +268,9 @@ wrapGSWithCustomName(
                 // TODO rewrite all iframe contentWindow functions
                 let cw = o['iframeContentWindow'].get.call(this);
                 cw.history.__proto__ = history.__proto__;
+                cw.HTMLElement.prototype = HTMLElement.prototype;
+                cw.fetch = fetch;
+                cw.XMLHttpRequest.prototype = XMLHttpRequest.prototype;
                 iframeContentWindows[this] = cw;
             }
             return iframeContentWindows[this];

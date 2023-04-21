@@ -16,7 +16,8 @@ const config = {
     browserDir: path.join(__dirname, '../', 'browser'),
     addonDir: path.join(__dirname, '../', 'addons'),
     staticDir: path.join(__dirname, '../', 'static'),
-    addonsEnabled: ['example', 'norefer' ]
+    addonsEnabled: ['example', 'norefer' ],
+    dbDebug: false
 }
 
 

@@ -6,7 +6,9 @@ import { Sequelize, Model, DataTypes, Op } from 'sequelize';
 import { config } from './config.js';
 
 
-const db = new Sequelize(config.dbConn);
+const db = new Sequelize(config.dbConn, {
+    logging: config.dbDebug
+});
 
 const URL = db.define('URL', {
     href: {

@@ -8,7 +8,7 @@ const port = 3000;
 
 app.use(express.raw({'type': () => true}));
 app.use('/', mainRouter);
-app.use('/static', express.static(config.staticDir))
+app.use('/static', express.static(config.staticDir));
 
 function startBackend() {
     app.listen(port, () => {

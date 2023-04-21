@@ -24,10 +24,17 @@ function getDefaultRequestOptions() {
     };
 };
 
-function getDefaultRequestHeaders() {
-    return {
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
-    };
+function getDefaultRequestHeaders(reqHeaders, url) {
+    let headers = {};
+    for(let k in reqHeaders) {
+        if(k == "host" || k == "cookie" || k == "content-length" || k == "referer" || k == "origin") {
+            continue;
+        }
+        headers[k] = reqHeaders[k];
+    }
+    let urlParts = url.split('/');
+    headers['origin'] = `${urlParts[0]}//${urlParts[2]}`;
+    return headers;
 }
 
 function serializeQuery(obj) {
@@ -48,6 +55,17 @@ function extractOriginalURL(u) {
         return u.path.substr(6);
     }
     return '';
+}
+
+function setResponseHeaders(response, exterResponse) {
+    for(let k in response.headers) {
+        // TODO
+        let lk = k.toLowerCase();
+        if(lk.startsWith("content-security") || lk.startsWith("cross-origin") || lk == 'set-cookie' || lk == 'connection' || lk == 'strict-transport-security' || lk == 'content-encoding' || lk == 'content-length') {
+            continue;
+        }
+        exterResponse.header(k, response.headers[k]);
+    }
 }
 
 async function downloadEndpoint(req, exterResponse, next) {
@@ -71,7 +89,7 @@ async function downloadEndpoint(req, exterResponse, next) {
         }
     }
     if(req.query) {
-        const qs = serializeQuery(req.query)
+        const qs = serializeQuery(req.query);
         if(qs) {
             url = `${url}?${qs}`;
         }
@@ -82,12 +100,16 @@ async function downloadEndpoint(req, exterResponse, next) {
         'abort': false,
         'url': url,
         'options': getDefaultRequestOptions(),
-        'headers': getDefaultRequestHeaders()
-    }
-    params.headers['Referer'] = extractOriginalURL(req.get('Referer'));
+        'headers': getDefaultRequestHeaders(req.headers, url)
+    };
+    params.headers['referer'] = extractOriginalURL(req.get('Referer'));
     if(req.method == 'POST' || req.method == 'PATCH') {
         doRequest = got.post;
-        params.options.body = req.body;
+        if(req.headers['content-type'] == 'application/json') {
+            params.options.body = req.body.toString('utf8');
+        } else {
+            params.options.body = req.body;
+        }
         params.headers['content-type'] = req.headers['content-type'];
     }
     let newParams = createEvents('Request', params);
@@ -99,18 +121,20 @@ async function downloadEndpoint(req, exterResponse, next) {
         return;
     }
     params.options.headers = params.headers;
+    console.log("Fetching ", req.method, params.url);
     doRequest(params.url, params.options).then(async response => {
         if(response.redirectUrls.length) {
             params.url = response.redirectUrls.slice(-1)[0].href;
         }
-        console.log("Fetching ", response.statusCode, req.method, params.url, response.headers['content-type']);
         const ctype = (response.headers['content-type'] || '').split(';')[0].toLowerCase();
         await addRequest(params.url, response.statusCode, ctype);
         const responseHandler = responseTypeHandlers[ctype];
+        exterResponse.status(response.statusCode);
+        setResponseHeaders(response, exterResponse);
         if(responseHandler !== undefined) {
             responseHandler(response, exterResponse, url);
         } else {
-            exterResponse.contentType(response.headers['content-type'] || '');
+            //exterResponse.set(response.headers);
             exterResponse.status(200).end(response.body, 'binary');
         }
         console.log(new Date().getTime()-start);

@@ -113,8 +113,6 @@ function transformHtml(response, exterResponse, url) {
             }
         }
     });
-    exterResponse.contentType('text/html');
-    exterResponse.status(response.statusCode);
     writeBrowserPayload(
         exterResponse,
         {
@@ -127,7 +125,8 @@ function transformHtml(response, exterResponse, url) {
 }
 
 function transformCss(response, exterResponse, url) {
-    exterResponse.status(200).send(transformStyle(response.body.toString(), url));
+    exterResponse.write(transformStyle(response.body.toString(), url));
+    exterResponse.end();
 }
 
 function transformStyle(style, url) {

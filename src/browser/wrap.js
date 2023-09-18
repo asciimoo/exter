@@ -65,13 +65,13 @@ function wrapFn(name, origFn, newFn) {
 }
 
 // Wrap getters/setters
-function wrapGS(name, origGS, newGS) {
-    o[name] = Object.getOwnPropertyDescriptor(origGS, name);
-    Object.defineProperty(origGS, name, newGS);
+function wrapGS(name, obj, newGS) {
+    o[name] = Object.getOwnPropertyDescriptor(obj, name);
+    Object.defineProperty(obj, name, newGS);
 }
-function wrapGSWithCustomName(name, property, origGS, newGS) {
-    o[name] = Object.getOwnPropertyDescriptor(origGS, property);
-    Object.defineProperty(origGS, property, newGS);
+function wrapGSWithCustomName(name, property, obj, newGS) {
+    o[name] = Object.getOwnPropertyDescriptor(obj, property);
+    Object.defineProperty(obj, property, newGS);
 }
 
 console.log = wrapFn(
@@ -80,6 +80,10 @@ console.log = wrapFn(
         o['console_log']("[APP_LOG]", ...arguments);
     }
 );
+
+/*
+ * HTMLElement
+ */
 
 for(const f of domEditFunctions) {
     HTMLElement.prototype[f] = wrapFn(
@@ -94,7 +98,7 @@ for(const f of domEditFunctions) {
             };
             params = createEvents([f, 'domEdit'], params);
             if(params.abort) {
-                return;
+                return null;
             }
             return o[f].call(params.element, ...params.args);
         }
@@ -159,24 +163,6 @@ wrapGS(
     }
 );
 
-//wrapGS(
-//    'attributes', HTMLElement.prototype.__proto__,
-//    {
-//        get() {
-//            let ret = o['attributes'].get.call(this);
-//            for(let v of ret) {
-//                if(v.name == 'href' || v.name == 'src' || v.name == 'action') {
-//                    v.value = unwrapUrl(v.value);
-//                }
-//            }
-//            return ret;
-//        },
-//        set() {
-//            return o['attributes'].set.call(this, ...arguments);
-//        }
-//    }
-//);
-
 wrapGSWithCustomName(
     'attrValue', 'value', Attr.prototype,
     {
@@ -196,6 +182,9 @@ wrapGSWithCustomName(
     }
 );
 
+/*
+ * Cookie
+ */
 
 wrapGS(
     'cookie', document.__proto__.__proto__,
@@ -212,6 +201,10 @@ wrapGS(
         }
     }
 );
+
+/*
+ * History
+ */
 
 history.__proto__.pushState = wrapFn(
     'pushState', window.history.__proto__.pushState,
@@ -231,6 +224,81 @@ history.__proto__.replaceState = wrapFn(
 
 // TODO
 // history.state , PopStateEvent
+
+///*
+//  Location
+//*/
+//
+//wrapGS(
+//    'location', window.__proto__,
+//    {
+//        get() {
+//            return vars['url'];
+//        },
+//        set(u) {
+//            // TODO handle domain
+//            let cookie = encodeURIComponent(value);
+//            let url = encodeURIComponent(vars['url']);
+//            return o['locationHref'] = wrapUrl(u, vars['url'], '/open/');
+//        }
+//    }
+//);
+
+/*
+  Window Window.location
+*/
+
+// TODO wrap/unwrap dynamic script tags/attributes with scriptPrefix & scriptPostfix
+
+let loc = {};
+
+Object.defineProperty(loc, "href", {
+    get() {
+        return vars['url'];
+    },
+    set(u) {
+        //let url = encodeURIComponent(vars['url']);
+        window.location.href = wrapUrl(u, vars['url'], '/open/');
+    }
+});
+// TODO other window.location members: https://www.w3schools.com/js/js_window_location.asp
+
+window.getLocation = () => {
+    return loc;
+};
+
+function getProxyFactory(o) {
+    return () => {
+        let w = new Proxy(window, {
+            get(target, prop, receiver) {
+                switch(prop) {
+                case "window":
+                    return receiver;
+                case "location":
+                    return loc;
+                case "getLocation", "getProxy", "0":
+                    return undefined;
+                }
+                return target[prop];
+            },
+            set(obj, prop, value) {
+                if(prop == "location") {
+                    window.location.href = wrapUrl(value, vars['url'], '/open/');
+                }
+            },
+            GetPrototypeOf() {
+                return Window;
+            }
+        });
+        return w;
+    };
+}
+
+window.getProxy = getProxyFactory(o);
+
+/*
+  AJAX
+*/
 
 XMLHttpRequest.prototype.send = wrapFn(
     'XMLHttpRequest_send', XMLHttpRequest.prototype.send,
@@ -258,7 +326,11 @@ fetch = async function() {
     return o['fetch'].call(this, ...arguments);
 };
 
-iframeContentWindows = {};
+/*
+ * Iframe content window
+ */
+
+let iframeContentWindows = {};
 
 wrapGSWithCustomName(
     'iframeContentWindow', 'contentWindow', HTMLIFrameElement.prototype,
@@ -279,6 +351,11 @@ wrapGSWithCustomName(
         }
     }
 );
+
+
+/*
+ * Misc
+ */
 
 function debuglog() {
     if(!vars.debug) return;
@@ -301,8 +378,7 @@ function debuglog() {
  */
 
 
-var console = copyObj(console);;
-console.ownCode = vars['namespace'];
+let console = copyObj(console);;
 
 // TODO find a way to restore HTMLElement/document/etc
 

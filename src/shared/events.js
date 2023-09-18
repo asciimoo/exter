@@ -41,4 +41,16 @@ function createEvents(names, args) {
     return args;
 }
 
-export { registerEventHandler, createEvents };
+
+
+// TODO move from events.js
+let scriptPrefix = `((window)=>{
+let location = window.getLocation();
+window = window.getProxy();
+let globalThis = window;`;
+
+let scriptPostfix = "})(window);";
+
+
+//TODO multiline export not allowed currently
+export { registerEventHandler, createEvents, scriptPrefix, scriptPostfix };

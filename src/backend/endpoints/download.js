@@ -8,13 +8,15 @@ import { createEvents } from '../../shared/events.js';
 import { wrapUrl } from '../utils.js';
 import {
     transformHtml,
-    transformCss
+    transformCss,
+    transformScript,
 } from '../transform.js';
 
 
 const responseTypeHandlers = {
     'text/html': transformHtml,
     'text/css': transformCss,
+    'text/javascript': transformScript,
 };
 
 function getDefaultRequestOptions() {

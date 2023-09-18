@@ -6,7 +6,7 @@ import * as csstree from 'css-tree';
 import { addons } from './addonstore.js';
 import { config } from './config.js';
 import { wrapUrl } from './utils.js';
-import { registerEventHandler } from '../shared/events.js';
+import { registerEventHandler, scriptPrefix, scriptPostfix } from '../shared/events.js';
 
 let browserScripts = [];
 for(const f of config.browserFiles) {
@@ -39,6 +39,7 @@ function writeBrowserPayload(response, vars) {
     vars = JSON.stringify(vars);
     response.write(`<script>
 (function ${namespace}(console, document, window, HTMLElement) {
+'use strict';
 let vars = ${vars};
 ${browserScripts}
 ${addonPayloads}
@@ -82,32 +83,46 @@ const selfClosingTags = {
 }
 
 function transformHtml(response, exterResponse, url) {
-    let tagname = '';
+    let textTagname = '';
     const parser = new htmlparser2.Parser({
         onopentag(tagname, attributes) {
             if(elementHandlers[tagname]) {
                 let ret = elementHandlers[tagname](tagname, attributes, url);
                 tagname = ret[0];
+                textTagname = ret[0];
                 attributes = ret[1];
+            } else {
+                textTagname = tagname;
             }
             const handler = attributeHandlers[tagname];
             if(handler) {
                 handler(attributes, url);
             }
             let tagStr = `<${tagname}`;
-            for(const [k, v] of Object.entries(attributes)) {
+            for(let [k, v] of Object.entries(attributes)) {
+                if(k.toLowerCase().startsWith("on")) {
+                    v = scriptPrefix+v+scriptPostfix;
+                }
+                // TODO check sanitization
                 tagStr += ` ${k}="${v}"`;
             }
             exterResponse.write(tagStr + (selfClosingTags[tagname] ? '/>' : '>'));
+            if(tagname == "script") {
+                exterResponse.write(scriptPrefix);
+            }
         },
         ontext(text) {
-            const handler = elementTextHandlers[tagname];
+            const handler = elementTextHandlers[textTagname];
             if(handler) {
                 text = handler(text, url);
             }
             exterResponse.write(text);
         },
         onclosetag(tagname) {
+            textTagname = '';
+            if(tagname == "script") {
+                exterResponse.write(scriptPostfix);
+            }
             if(!selfClosingTags[tagname]) {
                 exterResponse.write(`</${tagname}>`);
             }
@@ -129,6 +144,11 @@ function transformCss(response, exterResponse, url) {
     exterResponse.end();
 }
 
+function transformScript(response, exterResponse, url) {
+    exterResponse.write(scriptPrefix+response.body.toString()+scriptPostfix);
+    exterResponse.end();
+}
+
 function transformStyle(style, url) {
     const ast = csstree.parse(style);
     csstree.walk(ast, (node) => {
@@ -137,6 +157,10 @@ function transformStyle(style, url) {
         }
     });
     return csstree.generate(ast);
+}
+
+function addScriptWrapper(script, url) {
+    return scriptPrefix+script+scriptPostfix;
 }
 
 function handleHref(attributes, url) {
@@ -194,4 +218,5 @@ function handleLinkElement(name, attributes, url) {
 export {
     transformHtml,
     transformCss,
+    transformScript,
 };

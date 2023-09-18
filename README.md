@@ -53,28 +53,30 @@ Project is licensed under [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html) *
 
 First of all, handle TODOS properly using issues.
 
+### App
+ - Create & document the full addon API
+ - Add multi-user support
+ - Config management
+ - Support SSL/TLS level addon access
+ - Performance optimizations
+ - Provide UI primitives to addon UIs
+
 ### Addons
  - Browser/backend communication
  - Persistent storage
  - Find a solution to allow addons to use the original (not wrapped) js functions
  - Define more events
 
-### App
- - Add multi-user support
- - Config management
-
 ### Browser rewrites (a.k.a wrap.js)
  - Form file upload
  - Wrap
    - remaining dom manipulation functions
-    - AJAX (network) requests
     - event listener handlers
     - document.location
     - ShadowRoot
     - ...etc
  - Sanitize/transform html added by client js
  - Handle video/embedded multimedia
- - Set cookies with `domain=` attribute
 
 ### Tests
 

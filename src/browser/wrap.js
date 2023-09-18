@@ -268,7 +268,7 @@ window.getLocation = () => {
 };
 
 function getProxyFactory(o) {
-    return () => {
+    return (scope) => {
         let w = new Proxy(window, {
             get(target, prop, receiver) {
                 switch(prop) {
@@ -278,12 +278,20 @@ function getProxyFactory(o) {
                     return loc;
                 case "getLocation", "getProxy", "0":
                     return undefined;
+                case "addEventListener":
+                    return window.addEventListener.bind(window);
+                case "removeEventListener":
+                    return window.addEventListener.bind(window);
+                case "postMessage":
+                    return window.postMessage.bind(window);
                 }
                 return target[prop];
             },
             set(obj, prop, value) {
                 if(prop == "location") {
                     window.location.href = wrapUrl(value, vars['url'], '/open/');
+                } else {
+                    obj[prop] = value;
                 }
             },
             GetPrototypeOf() {
@@ -378,7 +386,7 @@ function debuglog() {
  */
 
 
-let console = copyObj(console);;
+var console = copyObj(console);
 
 // TODO find a way to restore HTMLElement/document/etc
 

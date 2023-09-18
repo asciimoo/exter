@@ -86,8 +86,12 @@ function transformHtml(response, exterResponse, url) {
     let textTagname = '';
     const parser = new htmlparser2.Parser({
         onopentag(tagname, attributes) {
+            let addCloseTag = false;
             if(elementHandlers[tagname]) {
                 let ret = elementHandlers[tagname](tagname, attributes, url);
+                if(selfClosingTags[tagname] && !selfClosingTags[ret[0]]) {
+                    addCloseTag = true;
+                }
                 tagname = ret[0];
                 textTagname = ret[0];
                 attributes = ret[1];
@@ -109,6 +113,9 @@ function transformHtml(response, exterResponse, url) {
             exterResponse.write(tagStr + (selfClosingTags[tagname] ? '/>' : '>'));
             if(tagname == "script") {
                 exterResponse.write(scriptPrefix);
+            }
+            if(addCloseTag) {
+                exterResponse.write(`</${tagname}>`);
             }
         },
         ontext(text) {
@@ -206,7 +213,7 @@ function handleLinkElement(name, attributes, url) {
     if(attributes.rel == 'preload') {
         if(attributes.as == 'script') {
             name = 'script';
-            attributes = {src: url};
+            attributes = {src: wrapUrl(attributes.href, url)};
         }
     }
     if(attributes.href) {

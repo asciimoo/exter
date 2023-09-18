@@ -44,12 +44,14 @@ function createEvents(names, args) {
 
 
 // TODO move from events.js
-let scriptPrefix = `((window)=>{
+let scriptPrefix = `{
 let location = window.getLocation();
-window = window.getProxy();
-let globalThis = window;`;
+let a = window.getProxy(this);
+let globalThis = window;
+{ let window = a; a = undefined;
+`;
 
-let scriptPostfix = "})(window);";
+let scriptPostfix = "}}";
 
 
 //TODO multiline export not allowed currently
